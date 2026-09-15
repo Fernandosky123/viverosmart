@@ -1,0 +1,157 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// -----------------------------------------------------------------
+// ENTIDADES ORIGINALES (Vivero Inteligente)
+// Mantenidas por compatibilidad visual
+// -----------------------------------------------------------------
+model Plant {
+  id              Int               @id @default(autoincrement())
+  name            String
+  species         String
+  createdAt       DateTime          @default(now())
+  lat             Float
+  lng             Float
+  soilStates      SoilState[]
+  weatherStates   WeatherState[]
+  recommendations Recommendation[]
+  dailyReports    DailyReport[]
+}
+
+model SoilState {
+  id                 Int      @id @default(autoincrement())
+  plantId            Int
+  moisturePercentage Float
+  state              String   
+  timestamp          DateTime @default(now())
+  plant              Plant    @relation(fields: [plantId], references: [id], onDelete: Cascade)
+}
+
+model WeatherState {
+  id        Int      @id @default(autoincrement())
+  plantId   Int
+  state     String   
+  timestamp DateTime @default(now())
+  plant     Plant    @relation(fields: [plantId], references: [id], onDelete: Cascade)
+}
+
+model Recommendation {
+  id           Int      @id @default(autoincrement())
+  plantId      Int
+  message      String
+  urgencyLevel String   
+  timestamp    DateTime @default(now())
+  plant        Plant    @relation(fields: [plantId], references: [id], onDelete: Cascade)
+}
+
+model DailyReport {
+  id           Int      @id @default(autoincrement())
+  plantId      Int
+  date         DateTime @default(now())
+  waterSummary String
+  lightSummary String
+  jsonContent  String   
+  createdAt    DateTime @default(now())
+  plant        Plant    @relation(fields: [plantId], references: [id], onDelete: Cascade)
+}
+
+// -----------------------------------------------------------------
+// NUEVAS ENTIDADES (ViveroSmart - Consumo Agua y Energía)
+// -----------------------------------------------------------------
+
+model Role {
+  id       Int    @id @default(autoincrement())
+  name     String @unique // 'Administrador', 'Operador', 'Tecnico', 'Cliente'
+  users    User[]
+}
+
+model User {
+  id        Int        @id @default(autoincrement())
+  name      String
+  email     String     @unique
+  password  String
+  roleId    Int
+  role      Role       @relation(fields: [roleId], references: [id])
+  auditLogs AuditLog[]
+}
+
+model Sector {
+  id          Int           @id @default(autoincrement())
+  name        String        @unique
+  description String?
+  crops       Crop[]
+  sensors     Sensor[]
+  consumptions Consumption[]
+  alerts      Alert[]
+  schedules   Schedule[]
+}
+
+model Crop {
+  id       Int    @id @default(autoincrement())
+  name     String
+  species  String?
+  sectorId Int
+  sector   Sector @relation(fields: [sectorId], references: [id], onDelete: Cascade)
+}
+
+model Sensor {
+  id       Int     @id @default(autoincrement())
+  code     String  @unique
+  type     String  // 'AGUA' o 'ENERGIA'
+  status   String  @default("ACTIVO") // 'ACTIVO', 'INACTIVO', 'INCIDENCIA'
+  sectorId Int
+  sector   Sector  @relation(fields: [sectorId], references: [id], onDelete: Cascade)
+  consumptions Consumption[]
+}
+
+model Consumption {
+  id           Int      @id @default(autoincrement())
+  resourceType String   // 'AGUA' o 'ENERGIA'
+  quantity     Float    // litros o kWh
+  isManual     Boolean  @default(false)
+  timestamp    DateTime @default(now())
+  sectorId     Int
+  sector       Sector   @relation(fields: [sectorId], references: [id], onDelete: Cascade)
+  sensorId     Int?
+  sensor       Sensor?  @relation(fields: [sensorId], references: [id])
+}
+
+model Threshold {
+  id           Int    @id @default(autoincrement())
+  resourceType String @unique // 'AGUA' o 'ENERGIA'
+  maxLimit     Float
+}
+
+model Alert {
+  id           Int      @id @default(autoincrement())
+  resourceType String   // 'AGUA' o 'ENERGIA'
+  level        String   // 'ADVERTENCIA', 'CRITICA'
+  reason       String
+  timestamp    DateTime @default(now())
+  sectorId     Int
+  sector       Sector   @relation(fields: [sectorId], references: [id], onDelete: Cascade)
+}
+
+model Schedule {
+  id           Int      @id @default(autoincrement())
+  type         String   // 'RIEGO' o 'ILUMINACION'
+  time         String   // Ej: '14:30'
+  durationMins Int
+  sectorId     Int
+  sector       Sector   @relation(fields: [sectorId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  action    String
+  details   String?
+  timestamp DateTime @default(now())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
