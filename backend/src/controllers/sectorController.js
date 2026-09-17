@@ -3,7 +3,21 @@ const prisma = new PrismaClient();
 
 async function getAllSectors(req, res) {
   try {
-    const sectors = await prisma.sector.findMany({ include: { crops: true, sensors: true } });
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      include: { role: true, crops: true }
+    });
+
+    let whereClause = {};
+    if (user.role.name !== 'Administrador') {
+      const userSectorIds = [...new Set(user.crops.map(c => c.sectorId))];
+      whereClause = { id: { in: userSectorIds } };
+    }
+
+    const sectors = await prisma.sector.findMany({ 
+      where: whereClause,
+      include: { crops: true, sensors: true } 
+    });
     res.json(sectors);
   } catch (error) {
     res.status(500).json({ error: error.message });

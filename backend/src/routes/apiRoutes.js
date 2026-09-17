@@ -25,6 +25,10 @@ router.get('/sensores', getAllSensors);
 router.post('/sensores', createSensor);
 router.delete('/sensores/:id', deleteSensor);
 
+// Rutas de Cultivos
+const { getMyCrops } = require('../controllers/cropController');
+router.get('/mis-plantas', getMyCrops);
+
 // Rutas de Consumos
 router.get('/consumos', getConsumptions);
 router.post('/consumos', registerConsumption);

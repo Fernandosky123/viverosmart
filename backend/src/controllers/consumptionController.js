@@ -31,7 +31,26 @@ async function registerConsumption(req, res) {
 
 async function getConsumptions(req, res) {
   try {
+    const userRole = req.user.role; // Asumiendo que el middleware inyecta esto, o podemos buscarlo
+    
+    // Buscar rol del usuario si no viene en req.user
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      include: { role: true, crops: true }
+    });
+
+    let whereClause = {};
+    
+    // Si NO es Administrador, filtramos solo por los sectores donde tiene cultivos
+    if (user.role.name !== 'Administrador') {
+      const userSectorIds = [...new Set(user.crops.map(c => c.sectorId))];
+      whereClause = {
+        sectorId: { in: userSectorIds }
+      };
+    }
+
     const consumptions = await prisma.consumption.findMany({
+      where: whereClause,
       include: { sector: true, sensor: true },
       orderBy: { timestamp: 'desc' }
     });

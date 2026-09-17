@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -19,6 +19,11 @@ function LocationMarker({ position, setPosition, onLocationChange }) {
     },
   });
 
+  useEffect(() => {
+    // Forzar actualización del tamaño del mapa al cargar por si está en gris
+    setTimeout(() => { map.invalidateSize(); }, 500);
+  }, [map]);
+
   return position === null ? null : (
     <Marker position={position}>
       <Popup>Ubicación del Vivero</Popup>
@@ -27,16 +32,16 @@ function LocationMarker({ position, setPosition, onLocationChange }) {
 }
 
 export default function MapaPin({ onLocationChange, currentLat, currentLng }) {
-  const defaultCenter = { lat: -17.783, lng: -63.182 }; // Santa Cruz, Bolivia
-  const center = (currentLat && currentLng) ? { lat: currentLat, lng: currentLng } : defaultCenter;
-  const [position, setPosition] = useState(center);
+  const isValidLocation = currentLat && currentLng && currentLat !== 0;
+  const initialCenter = isValidLocation ? { lat: currentLat, lng: currentLng } : { lat: -17.783, lng: -63.182 };
+  const [position, setPosition] = useState(initialCenter);
 
   return (
-    <div className="rounded-xl overflow-hidden border-4 border-emerald-700/30 shadow-inner" style={{ height: '300px', width: '100%' }}>
-      <MapContainer center={center} zoom={13} scrollWheelZoom={false} style={{ height: '100%', width: '100%' }}>
+    <div className="rounded-xl overflow-hidden border-4 border-emerald-700/30 shadow-inner cursor-crosshair" style={{ height: '300px', width: '100%', position: 'relative', zIndex: 0 }}>
+      <MapContainer center={initialCenter} zoom={13} scrollWheelZoom={false} style={{ height: '100%', width: '100%' }}>
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='Tiles &copy; Esri'
+          url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
         />
         <LocationMarker position={position} setPosition={setPosition} onLocationChange={onLocationChange} />
       </MapContainer>

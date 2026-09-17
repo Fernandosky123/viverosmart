@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
-import { LayoutDashboard, Leaf, FileSpreadsheet, LogOut, Settings, Bell, TreePine } from 'lucide-react';
+import { LayoutDashboard, Leaf, FileSpreadsheet, LogOut, Settings, Bell, TreePine, Sprout } from 'lucide-react';
 import Dashboard from './Dashboard';
 import Sectores from './Sectores';
 import Sensores from './Sensores';
 import Umbrales from './Umbrales';
 import Reportes from './Reportes';
 import Usuarios from './Usuarios';
+import MisPlantas from './MisPlantas';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -43,6 +44,7 @@ export default function SmartApp() {
   // RBAC Menu Filtering
   const allMenuItems = [
     { path: '/dashboard', label: 'Dashboard Analítico', icon: <LayoutDashboard size={22} />, roles: ['Administrador', 'Operador', 'Cliente', 'Tecnico'] },
+    { path: '/dashboard/mis-plantas', label: 'Mis Plantas', icon: <Sprout size={22} />, roles: ['Administrador', 'Cliente'] },
     { path: '/dashboard/sectores', label: 'Zonas y Cultivos', icon: <Leaf size={22} />, roles: ['Administrador', 'Operador'] },
     { path: '/dashboard/sensores', label: 'Sensores IoT', icon: <TreePine size={22} />, roles: ['Administrador', 'Tecnico'] },
     { path: '/dashboard/umbrales', label: 'Umbrales y Alertas', icon: <Bell size={22} />, roles: ['Administrador', 'Tecnico'] },
@@ -154,6 +156,7 @@ export default function SmartApp() {
         <div className="flex-1 pb-12">
           <Routes>
             <Route path="/" element={<Dashboard />} />
+            <Route path="/mis-plantas" element={<MisPlantas />} />
             <Route path="/sectores" element={<Sectores />} />
             <Route path="/sensores" element={<Sensores />} />
             <Route path="/umbrales" element={<Umbrales />} />

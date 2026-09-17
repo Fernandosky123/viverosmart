@@ -1,75 +1,98 @@
 import React from 'react';
 
 export default function PixelArtVivero({ soilState, weatherState }) {
-  // Configuración de texturas estilo Terraria (Bloques de tierra con detalles y bordes de pasto)
+  
+  // Texturas de Suelo Realistas (Dirt / Mud / Dry)
   const soilStyles = {
     seco: {
-      base: 'bg-[#8d6e63]', // Tierra seca/arena
-      texture: 'radial-gradient(#795548 15%, transparent 16%), radial-gradient(#795548 15%, transparent 16%)',
-      border: 'border-[#5d4037]'
+      background: 'url("https://www.transparenttextures.com/patterns/cubes.png"), linear-gradient(to bottom, #d7ccc8, #a1887f)',
+      boxShadow: 'inset 0 0 50px rgba(93, 64, 55, 0.5)',
+      filter: 'brightness(1.1) contrast(0.9)',
+      grassColor: '#81c784'
     },
     media: {
-      base: 'bg-[#5d4037]', // Tierra normal
-      texture: 'radial-gradient(#4e342e 15%, transparent 16%), radial-gradient(#4e342e 15%, transparent 16%)',
-      border: 'border-[#3e2723]'
+      background: 'url("https://www.transparenttextures.com/patterns/dirt.png"), linear-gradient(to bottom, #5d4037, #3e2723)',
+      boxShadow: 'inset 0 0 60px rgba(0,0,0,0.6)',
+      filter: 'brightness(1) contrast(1)',
+      grassColor: '#4caf50'
     },
     mojado: {
-      base: 'bg-[#3e2723]', // Tierra oscura/barro
-      texture: 'radial-gradient(#26140e 15%, transparent 16%), radial-gradient(#26140e 15%, transparent 16%)',
-      border: 'border-[#1a0e0a]'
+      background: 'url("https://www.transparenttextures.com/patterns/dark-dirt.png"), linear-gradient(to bottom, #3e2723, #1a0e0a)',
+      boxShadow: 'inset 0 0 80px rgba(0,0,0,0.9)',
+      filter: 'brightness(0.8) contrast(1.2)',
+      grassColor: '#2e7d32'
     }
   };
 
   const currentSoil = soilStyles[soilState] || soilStyles['media'];
 
-  // Mapas de las dos parcelas (0: vacío, 1: Lechuga, 2: Calabaza, 3: Rábano)
+  // Mapas de parcelas (Reducidos a 3x3 para plantas gigantes)
   const plot1 = [
-    [1, 0, 1, 1, 0],
-    [1, 1, 0, 0, 3],
-    [0, 3, 3, 0, 3],
-    [3, 0, 0, 1, 0],
-    [1, 1, 1, 0, 0],
+    [1, 0, 1],
+    [0, 1, 0],
+    [1, 0, 1],
   ];
 
   const plot2 = [
-    [3, 0, 0, 2, 2],
-    [0, 1, 0, 2, 2],
-    [1, 0, 3, 3, 0],
-    [0, 3, 0, 1, 1],
-    [0, 0, 1, 0, 3],
+    [0, 2, 0],
+    [2, 0, 2],
+    [0, 2, 0],
   ];
 
-  // Componente interno del cultivo con animaciones CSS (Wind sway)
-  const Crop = ({ type, delay }) => {
+  // Renderizador de plantas ultra-realistas (SVG Complejos)
+  const RealisticPlant = ({ type, delay }) => {
     if (type === 0) return null;
     
-    // Lechuga animada
-    if (type === 1) return (
-      <div className="relative w-8 h-8 m-auto" style={{ animation: `sway 3s ease-in-out infinite alternate ${delay}s` }}>
-        <div className="absolute bottom-0 left-1 right-1 h-5 bg-[#4caf50] rounded-t-lg border-2 border-[#2e7d32] shadow-sm"></div>
-        <div className="absolute bottom-1 left-0 right-0 h-4 bg-[#81c784] rounded-t-full opacity-80"></div>
-        <div className="absolute top-2 left-2 w-2 h-2 bg-[#a5d6a7] rounded-full"></div>
-      </div>
-    );
-    
-    // Calabaza grande animada
+    // Girasol (Tipo 2)
     if (type === 2) return (
-      <div className="relative w-10 h-10 m-auto -mt-2" style={{ animation: `pulse-breathe 4s ease-in-out infinite alternate ${delay}s` }}>
-        <div className="absolute bottom-0 inset-x-0 h-8 bg-[#e65100] rounded-xl border-2 border-[#bf360c] shadow-md flex justify-center">
-          <div className="w-2 h-3 bg-[#33691e] -mt-3 border border-[#1b5e20] rounded-t-sm"></div>
-        </div>
-        <div className="absolute bottom-1 left-2 w-1.5 h-6 bg-[#ff9800] rounded-full opacity-80"></div>
-        <div className="absolute bottom-1 right-2 w-1.5 h-6 bg-[#ff9800] rounded-full opacity-80"></div>
-        <div className="absolute bottom-1 left-4 w-1.5 h-6 bg-[#ffb74d] rounded-full opacity-50"></div>
+      <div className="relative w-full h-full m-auto drop-shadow-2xl scale-[2.5] sm:scale-[3.0]" style={{ animation: `breeze 4s ease-in-out infinite alternate ${delay}s`, transformOrigin: 'bottom center' }}>
+        <svg viewBox="0 0 100 150" className="w-full h-full overflow-visible">
+          {/* Sombra */}
+          <ellipse cx="50" cy="145" rx="25" ry="8" fill="rgba(0,0,0,0.5)" filter="blur(3px)"/>
+          {/* Tallo */}
+          <path d="M50 145 Q45 90 50 40" stroke="#4CAF50" strokeWidth="6" fill="none" strokeLinecap="round" />
+          {/* Hojas */}
+          <path d="M50 110 Q70 100 80 120 Q60 130 50 110" fill="#81C784" />
+          <path d="M48 80 Q25 70 20 90 Q40 100 48 80" fill="#81C784" />
+          
+          {/* Cabeza del Girasol (Vista Top-Down ligeramente inclinada) */}
+          <circle cx="50" cy="40" r="28" fill="#FFD54F" />
+          {/* Petalos (Girasol) */}
+          <path d="M50 0 L56 18 L44 18 Z" fill="#FFC107" />
+          <path d="M50 80 L56 62 L44 62 Z" fill="#FFC107" />
+          <path d="M10 40 L28 34 L28 46 Z" fill="#FFC107" />
+          <path d="M90 40 L72 34 L72 46 Z" fill="#FFC107" />
+          <path d="M22 12 L36 24 L28 29 Z" fill="#FFC107" />
+          <path d="M78 12 L64 24 L72 29 Z" fill="#FFC107" />
+          <path d="M78 68 L64 56 L72 51 Z" fill="#FFC107" />
+          <path d="M22 68 L36 56 L28 51 Z" fill="#FFC107" />
+          {/* Centro (Semillas) */}
+          <circle cx="50" cy="40" r="16" fill="#5D4037" stroke="#3E2723" strokeWidth="2" />
+          <circle cx="50" cy="40" r="10" fill="#4E342E" stroke="#3E2723" strokeWidth="1" strokeDasharray="2,2" />
+        </svg>
       </div>
     );
 
-    // Rábano animado (Bounce)
-    if (type === 3) return (
-      <div className="relative w-6 h-8 m-auto mt-2" style={{ animation: `bounce-slow 2s ease-in-out infinite alternate ${delay}s` }}>
-        <div className="absolute bottom-0 inset-x-0 h-6 bg-[#c62828] rounded-b-full rounded-t-md border-2 border-[#b71c1c] shadow-sm"></div>
-        <div className="absolute -top-1 left-1 w-2 h-4 bg-[#2e7d32] transform -rotate-12 rounded-t-full border border-[#1b5e20]"></div>
-        <div className="absolute -top-1 right-1 w-2 h-4 bg-[#2e7d32] transform rotate-12 rounded-t-full border border-[#1b5e20]"></div>
+    // Tomate (Tipo 1)
+    if (type === 1) return (
+      <div className="relative w-full h-full m-auto drop-shadow-xl scale-[2.5] sm:scale-[3.0]" style={{ animation: `breeze 3s ease-in-out infinite alternate ${delay}s`, transformOrigin: 'bottom center' }}>
+        <svg viewBox="0 0 100 150" className="w-full h-full overflow-visible">
+          {/* Sombra */}
+          <ellipse cx="50" cy="140" rx="20" ry="5" fill="rgba(0,0,0,0.4)" filter="blur(2px)"/>
+          {/* Tallo */}
+          <path d="M50 140 Q45 80 50 30" stroke="#388E3C" strokeWidth="4" fill="none" />
+          {/* Hojas */}
+          <path d="M50 100 Q75 90 85 110 Q65 120 50 100" fill="#4CAF50" />
+          <path d="M50 70 Q25 60 15 80 Q35 90 50 70" fill="#4CAF50" />
+          {/* Frutos (Tomates) */}
+          <circle cx="70" cy="120" r="12" fill="#D32F2F" />
+          <circle cx="73" cy="116" r="3" fill="white" opacity="0.4" />
+          <path d="M70 108 L72 110 M68 110 L70 108" stroke="#1B5E20" strokeWidth="2" />
+
+          <circle cx="30" cy="90" r="10" fill="#E53935" />
+          <circle cx="32" cy="87" r="2.5" fill="white" opacity="0.4" />
+          <path d="M30 80 L32 82 M28 82 L30 80" stroke="#1B5E20" strokeWidth="2" />
+        </svg>
       </div>
     );
   };
@@ -77,41 +100,39 @@ export default function PixelArtVivero({ soilState, weatherState }) {
   return (
     <>
       <style>{`
-        @keyframes sway {
-          0% { transform: rotate(-8deg) skewX(2deg); }
-          100% { transform: rotate(8deg) skewX(-2deg); }
+        @keyframes breeze {
+          0% { transform: rotate(-3deg) skewX(1deg); }
+          100% { transform: rotate(3deg) skewX(-1deg); }
         }
-        @keyframes bounce-slow {
-          0% { transform: translateY(0px) scaleY(1); }
-          100% { transform: translateY(-3px) scaleY(1.05); }
+        @keyframes breathe {
+          0% { transform: scale(1) translateY(0); }
+          100% { transform: scale(1.02) translateY(-2px); }
         }
-        @keyframes pulse-breathe {
-          0% { transform: scale(1); }
-          100% { transform: scale(1.04); }
+        @keyframes rain-fall-real {
+          0% { transform: translateY(-100%) rotate(15deg); opacity: 0; }
+          20% { opacity: 0.8; }
+          80% { opacity: 0.8; }
+          100% { transform: translateY(1000%) rotate(15deg); opacity: 0; }
         }
-        @keyframes rain-fall {
-          0% { transform: translateY(-100%); opacity: 0; }
-          50% { opacity: 1; }
-          100% { transform: translateY(500%); opacity: 0; }
-        }
-        @keyframes sun-rotate {
-          0% { transform: rotate(0deg) scale(1); opacity: 0.3; }
-          50% { transform: rotate(180deg) scale(1.2); opacity: 0.5; }
-          100% { transform: rotate(360deg) scale(1); opacity: 0.3; }
+        @keyframes sun-rays {
+          0% { transform: rotate(0deg) scale(1); opacity: 0.2; }
+          50% { transform: rotate(180deg) scale(1.5); opacity: 0.4; }
+          100% { transform: rotate(360deg) scale(1); opacity: 0.2; }
         }
       `}</style>
 
-      <div className="w-full max-w-3xl mx-auto overflow-hidden rounded-xl border-[12px] border-[#3e2723] bg-[#7bc3a2] relative font-mono select-none shadow-2xl" style={{ imageRendering: 'pixelated' }}>
+      {/* Contenedor Principal Realista (Totalmente Responsive) */}
+      <div className="w-full max-w-2xl mx-auto overflow-hidden rounded-3xl border-8 sm:border-12 border-[#2c3e50] bg-[#95a5a6] relative shadow-2xl">
         
-        {/* === SISTEMA DE CLIMA DINÁMICO (Lluvia, Nubes, Sol) === */}
+        {/* === SISTEMA DE CLIMA DINÁMICO === */}
         {weatherState === 'nublado' && (
-          <div className="absolute inset-0 z-30 pointer-events-none bg-blue-900/40 mix-blend-multiply transition-colors duration-1000">
-            {/* Lluvia animada */}
+          <div className="absolute inset-0 z-50 pointer-events-none bg-[#1a252f]/40 mix-blend-overlay transition-colors duration-1000 backdrop-blur-[1px]">
+            {/* Lluvia realista */}
             {[...Array(20)].map((_, i) => (
-              <div key={i} className="absolute top-0 w-[2px] h-8 bg-blue-300/60" 
+              <div key={i} className="absolute top-0 w-[1px] h-12 bg-gradient-to-b from-transparent to-blue-300" 
                 style={{ 
                   left: `${Math.random() * 100}%`, 
-                  animation: `rain-fall ${0.5 + Math.random()}s linear infinite ${Math.random()}s` 
+                  animation: `rain-fall-real ${0.4 + Math.random() * 0.3}s linear infinite ${Math.random()}s` 
                 }}>
               </div>
             ))}
@@ -119,76 +140,73 @@ export default function PixelArtVivero({ soilState, weatherState }) {
         )}
         
         {weatherState === 'soleado' && (
-          <div className="absolute inset-0 z-30 pointer-events-none overflow-hidden transition-colors duration-1000">
-             {/* Rayos de sol mágicos */}
-            <div className="absolute -top-1/2 -left-1/2 w-[200%] h-[200%] bg-[conic-gradient(from_0deg,transparent_0deg,rgba(255,255,150,0.4)_30deg,transparent_60deg,rgba(255,255,150,0.4)_90deg,transparent_120deg,rgba(255,255,150,0.4)_150deg,transparent_180deg,rgba(255,255,150,0.4)_210deg,transparent_240deg,rgba(255,255,150,0.4)_270deg,transparent_330deg)]"
-              style={{ animation: 'sun-rotate 20s linear infinite' }}>
-            </div>
+          <div className="absolute inset-0 z-50 pointer-events-none overflow-hidden transition-colors duration-1000 mix-blend-screen">
+            <div className="absolute inset-0 bg-orange-400/10"></div>
           </div>
         )}
 
-        {/* === GRID DE PISO (Piedra estilo Dungeon/Terraria) === */}
-        <div className="p-6 grid grid-cols-12 gap-2 bg-[#607d8b] min-h-[450px]"
+        {/* === GRID DE PISO (Baldosas del invernadero) === */}
+        <div className="p-4 sm:p-6 grid grid-cols-12 gap-2 sm:gap-4 bg-[#bdc3c7]"
           style={{
-            backgroundImage: 'repeating-linear-gradient(45deg, #546e7a 25%, transparent 25%, transparent 75%, #546e7a 75%, #546e7a), repeating-linear-gradient(45deg, #546e7a 25%, #607d8b 25%, #607d8b 75%, #546e7a 75%, #546e7a)',
-            backgroundSize: '32px 32px',
-            backgroundPosition: '0 0, 16px 16px'
+            backgroundImage: `
+              linear-gradient(45deg, #95a5a6 25%, transparent 25%, transparent 75%, #95a5a6 75%, #95a5a6),
+              linear-gradient(45deg, #95a5a6 25%, #bdc3c7 25%, #bdc3c7 75%, #95a5a6 75%, #95a5a6)
+            `,
+            backgroundSize: '30px 30px',
+            backgroundPosition: '0 0, 15px 15px',
+            boxShadow: 'inset 0 0 50px rgba(0,0,0,0.5)'
           }}>
-          
-          {/* Macetas superiores */}
-          <div className="col-span-12 flex gap-6 mb-2 pl-4 z-10">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="w-24 h-12 bg-[#8d6e63] border-b-4 border-r-4 border-t-2 border-l-2 border-[#4e342e] flex items-end justify-center shadow-lg relative overflow-visible">
-                <div className="absolute -top-4 w-12 h-12">
-                   <Crop type={1} delay={i * 0.5} />
-                </div>
-              </div>
-            ))}
-          </div>
 
-          {/* PARCELA IZQUIERDA (Bloque de tierra Terraria) */}
-          <div className={`col-span-5 relative transition-all duration-1000 shadow-2xl p-3 grid grid-cols-5 gap-0 ${currentSoil.base} ${currentSoil.border} border-[6px] rounded-lg`}
-            style={{ backgroundImage: currentSoil.texture, backgroundSize: '16px 16px' }}>
+          {/* PARCELA IZQUIERDA (Tomates) */}
+          <div className="col-span-5 relative transition-all duration-1000 p-2 sm:p-4 grid grid-cols-3 gap-2 sm:gap-4 rounded-lg sm:rounded-xl w-full"
+            style={{ 
+              background: currentSoil.background, 
+              boxShadow: currentSoil.boxShadow + ', 0 10px 20px rgba(0,0,0,0.4)',
+              filter: currentSoil.filter,
+              border: '6px solid #5D4037',
+              borderBottomWidth: '12px',
+              borderRightWidth: '8px'
+            }}>
             
-            {/* Césped superior del bloque (Terraria style) */}
-            <div className="absolute -top-[10px] -left-[6px] -right-[6px] h-4 bg-[#4caf50] border-b-4 border-[#388e3c] rounded-t-sm z-10">
-              {/* Dientes de pasto */}
-              <div className="absolute bottom-[-4px] left-2 w-2 h-2 bg-[#388e3c]"></div>
-              <div className="absolute bottom-[-4px] left-6 w-2 h-3 bg-[#388e3c]"></div>
-              <div className="absolute bottom-[-4px] right-4 w-2 h-2 bg-[#388e3c]"></div>
-            </div>
+            {/* Césped realista en los bordes */}
+            <div className="absolute -top-2 -left-2 -right-2 h-2 z-10 opacity-90 blur-[1px]" style={{ backgroundColor: currentSoil.grassColor, borderRadius: '2px' }}></div>
+            <div className="absolute -bottom-4 -left-2 -right-2 h-3 z-10 opacity-80 blur-[2px]" style={{ backgroundColor: currentSoil.grassColor, borderRadius: '2px' }}></div>
 
-            {/* Renderizado de Cultivos con delay aleatorio para que se muevan natural */}
             {plot1.map((row, i) => 
               row.map((cell, j) => (
-                <div key={`p1-${i}-${j}`} className="w-12 h-12 flex items-center justify-center relative z-20">
-                  {/* Sombra debajo del cultivo */}
-                  {cell !== 0 && <div className="absolute bottom-1 w-6 h-2 bg-black/30 rounded-full blur-[1px]"></div>}
-                  <Crop type={cell} delay={(i+j) * 0.3} />
+                <div key={`p1-${i}-${j}`} className="w-full aspect-[2/3] flex items-end justify-center relative z-20">
+                  <RealisticPlant type={cell} delay={(i+j) * 0.3} />
                 </div>
               ))
             )}
           </div>
 
-          {/* Pasillo central de piedra */}
-          <div className="col-span-2"></div>
+          {/* Pasillo central */}
+          <div className="col-span-2 flex justify-center py-2">
+            {/* Rejilla de desagüe realista */}
+            <div className="w-full max-w-[24px] h-full bg-[#34495e] border-x-2 border-[#2c3e50] opacity-50 shadow-[inset_0_0_10px_rgba(0,0,0,0.8)]"
+              style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 10px, #1a252f 10px, #1a252f 16px)' }}></div>
+          </div>
 
-          {/* PARCELA DERECHA */}
-          <div className={`col-span-5 relative transition-all duration-1000 shadow-2xl p-3 grid grid-cols-5 gap-0 ${currentSoil.base} ${currentSoil.border} border-[6px] rounded-lg`}
-            style={{ backgroundImage: currentSoil.texture, backgroundSize: '16px 16px' }}>
+          {/* PARCELA DERECHA (Girasoles) */}
+          <div className="col-span-5 relative transition-all duration-1000 p-2 sm:p-4 grid grid-cols-3 gap-2 sm:gap-4 rounded-lg sm:rounded-xl w-full"
+            style={{ 
+              background: currentSoil.background, 
+              boxShadow: currentSoil.boxShadow + ', 0 10px 20px rgba(0,0,0,0.4)',
+              filter: currentSoil.filter,
+              border: '6px solid #5D4037',
+              borderBottomWidth: '12px',
+              borderRightWidth: '8px'
+            }}>
             
-            {/* Césped superior */}
-            <div className="absolute -top-[10px] -left-[6px] -right-[6px] h-4 bg-[#4caf50] border-b-4 border-[#388e3c] rounded-t-sm z-10">
-              <div className="absolute bottom-[-4px] left-3 w-2 h-3 bg-[#388e3c]"></div>
-              <div className="absolute bottom-[-4px] right-2 w-2 h-2 bg-[#388e3c]"></div>
-              <div className="absolute bottom-[-4px] right-8 w-2 h-3 bg-[#388e3c]"></div>
-            </div>
+            {/* Césped */}
+            <div className="absolute -top-2 -left-2 -right-2 h-2 z-10 opacity-90 blur-[1px]" style={{ backgroundColor: currentSoil.grassColor, borderRadius: '2px' }}></div>
+            <div className="absolute -bottom-4 -left-2 -right-2 h-3 z-10 opacity-80 blur-[2px]" style={{ backgroundColor: currentSoil.grassColor, borderRadius: '2px' }}></div>
 
             {plot2.map((row, i) => 
               row.map((cell, j) => (
-                <div key={`p2-${i}-${j}`} className="w-12 h-12 flex items-center justify-center relative z-20">
-                  {cell !== 0 && <div className="absolute bottom-1 w-6 h-2 bg-black/30 rounded-full blur-[1px]"></div>}
-                  <Crop type={cell} delay={(i+j) * 0.4} />
+                <div key={`p2-${i}-${j}`} className="w-full aspect-[2/3] flex items-end justify-center relative z-20">
+                  <RealisticPlant type={cell} delay={(i+j) * 0.4} />
                 </div>
               ))
             )}

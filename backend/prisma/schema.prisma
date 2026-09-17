@@ -79,6 +79,7 @@ model User {
   roleId    Int
   role      Role       @relation(fields: [roleId], references: [id])
   auditLogs AuditLog[]
+  crops     Crop[]
 }
 
 model Sector {
@@ -93,11 +94,15 @@ model Sector {
 }
 
 model Crop {
-  id       Int    @id @default(autoincrement())
-  name     String
-  species  String?
-  sectorId Int
-  sector   Sector @relation(fields: [sectorId], references: [id], onDelete: Cascade)
+  id            Int     @id @default(autoincrement())
+  name          String
+  species       String?
+  stage         String  @default("Semilla") // Semilla, Brote, Crecimiento, Floración, Cosecha
+  growthPercent Int     @default(0)
+  sectorId      Int
+  sector        Sector  @relation(fields: [sectorId], references: [id], onDelete: Cascade)
+  userId        Int?
+  user          User?   @relation(fields: [userId], references: [id])
 }
 
 model Sensor {
