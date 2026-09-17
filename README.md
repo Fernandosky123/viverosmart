@@ -66,7 +66,6 @@ Abre la URL del Frontend en tu navegador web. Como ejecutaste los scripts de bas
 * **Administrador Global:** `admin@vivero.com`
 * **Operador (Riego):** `operador@vivero.com`
 * **Técnico (Sensores):** `tecnico@vivero.com`
-* **Cliente (Lectura):** `cliente@vivero.com`
 
 **Contraseña para todos:** `123456`
 
