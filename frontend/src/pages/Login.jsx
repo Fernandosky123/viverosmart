@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Leaf, MessageCircle, Send, Check, X, Play } from 'lucide-react';
+import { Leaf, MessageCircle, Send, Check, X, Play, Eye, EyeOff } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [showChat, setShowChat] = useState(false);
   const [showPlanes, setShowPlanes] = useState(false);
   const [showDemo, setShowDemo] = useState(false);
@@ -299,11 +300,20 @@ export default function Login() {
             </div>
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-2">Contraseña</label>
-              <input 
-                type="password" required placeholder="••••••••"
-                value={password} onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 transition-colors bg-gray-50 focus:bg-white" 
-              />
+              <div className="relative">
+                <input 
+                  type={showPassword ? "text" : "password"} required placeholder="••••••••"
+                  value={password} onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 transition-colors bg-gray-50 focus:bg-white pr-12" 
+                />
+                <button 
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-emerald-600 transition-colors focus:outline-none"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
             </div>
             
             <div className="flex justify-between items-center text-sm">
