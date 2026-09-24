@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Sun, Droplets, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -8,7 +8,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 const PlantAvatar = ({ type }) => {
   const isTomato = type.toLowerCase().includes('tomat') || type.toLowerCase().includes('solanum');
   const isSunflower = type.toLowerCase().includes('girasol') || type.toLowerCase().includes('helianthus');
-  
+
   if (isTomato) {
     return (
       <svg width="60" height="60" viewBox="0 0 100 120" className="drop-shadow-lg transform transition-transform group-hover:scale-110">
@@ -96,7 +96,7 @@ export default function MisPlantas() {
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {plantas.map(planta => (
           <div key={planta.id} className="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden group hover:shadow-lg transition-all">
-            
+
             {/* Header / Especie */}
             <div className="p-6 border-b border-stone-100 bg-gradient-to-br from-emerald-50 to-white relative overflow-hidden h-32 flex flex-col justify-center">
               <div className="absolute right-4 bottom-4">
@@ -108,17 +108,17 @@ export default function MisPlantas() {
 
             {/* Body / Progreso */}
             <div className="p-6 space-y-6">
-              
+
               <div>
                 <div className="flex justify-between items-end mb-2">
                   <span className="text-sm font-bold text-stone-500 uppercase tracking-wider">Etapa Actual</span>
                   <span className="text-lg font-black text-emerald-700">{planta.stage}</span>
                 </div>
-                
+
                 {/* Progress Bar Container */}
                 <div className="h-4 w-full bg-stone-100 rounded-full overflow-hidden relative shadow-inner">
                   {/* Progress Bar Fill */}
-                  <div 
+                  <div
                     className="absolute top-0 left-0 h-full bg-gradient-to-r from-emerald-400 to-emerald-600 rounded-full transition-all duration-1000"
                     style={{ width: `${planta.growthPercent}%` }}
                   ></div>
@@ -152,8 +152,8 @@ export default function MisPlantas() {
             <div className="flex justify-center mb-4 opacity-50 grayscale"><PlantAvatar type="generic" /></div>
             <h3 className="text-xl font-bold text-stone-700 mb-2">No tienes cultivos asignados</h3>
             <p className="text-stone-500">Adquiere un plan para empezar a rastrear el crecimiento de tus plantas en nuestro vivero.</p>
-            <button className="mt-6 bg-emerald-600 text-white px-6 py-2 rounded-xl font-bold hover:bg-emerald-700 inline-flex items-center gap-2 transition-all hover:scale-105 shadow-lg shadow-emerald-200">
-              Ver Catálogo <ArrowRight size={18} />
+            <button onClick={() => navigate('/simulador?nueva=1')} className="mt-6 bg-emerald-600 text-white px-6 py-2 rounded-xl font-bold hover:bg-emerald-700 inline-flex items-center gap-2 transition-all hover:scale-105 shadow-lg shadow-emerald-200">
+              Registrar una planta <ArrowRight size={18} />
             </button>
           </div>
         )}

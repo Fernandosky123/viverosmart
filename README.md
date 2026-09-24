@@ -1,79 +1,108 @@
-#  ViveroSmart
-## Paso 1: Configurar la Base de Datos y el Backend
+# ViveroSmart
 
-1. Abre una terminal y navega a la carpeta del backend:
-   bash
-   cd backend
-   
+Aplicación privada para gestionar zonas, cultivos, sensores, consumos de agua y energía, alertas, programaciones y reportes de un vivero.
 
-2. Instala las dependencias del servidor:
-  bash
-   npm install
-   
+## Requisitos
 
-3. Crea un archivo llamado `.env` dentro de la carpeta `backend` y añade la conexión a tu base de datos PostgreSQL y una clave secreta para los tokens:
-   .env
-   DATABASE_URL="postgresql://postgres:TU_CONTRASEÑA@localhost:5432/vivero_inteligente?schema=public"
-   JWT_SECRET="super_secreto_vivero_123"
-   ```
-   *(Cambia `TU_CONTRASEÑA` por la contraseña que le pusiste a tu usuario de PostgreSQL).*
+- Node.js 22 o compatible
+- PostgreSQL
+- npm
 
-4. Sincroniza la base de datos con Prisma (creará las tablas automáticamente) y genera el cliente:
-   bash
-   npx prisma db push
-   npx prisma generate
-   
+## Configuración local
 
-5. **(Opcional pero recomendado)** Ejecuta los scripts de "semilla" para inyectar usuarios, roles, sectores y sensores de prueba:
-   ```bash
-   node seedRoles.js
-   node seedUsers.js
-   node seed.js
+### Backend
+
+```bash
+cd backend
+npm install
+```
+
+Crear `backend/.env` manualmente con, como mínimo:
+
+```env
+DATABASE_URL="postgresql://usuario:contraseña@localhost:5432/viverosmart?schema=public"
+JWT_SECRET="un-secreto-largo-y-aleatorio"
+FRONTEND_URL="http://localhost:5173"
+```
+
+Después sincronizar la base e iniciar el servidor:
+
+```bash
+npx prisma db push
+npx prisma generate
+npm start
+```
 
 
-6. ¡Inicia el servidor Backend!
-   bash
-   npm run dev
-   
-   *(El servidor debería arrancar en http://localhost:5000 y verás el Simulador IoT activándose en consola).*
+### Frontend
 
----
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-## Paso 2: Configurar y Arrancar el Frontend
 
-1. Abre **una nueva pestaña/ventana** en tu terminal y navega a la carpeta del frontend:
-   bash
-   cd frontend
-   
+## Variables de entorno
 
-2. Instala las dependencias web:
-   bash
-   npm install
-   
+Backend:
 
-3. Arranca la aplicación de React:
-   bash
-   npm run dev
-   
-   *(Se te abrirá una URL, usualmente http://localhost:5173).*
+- `DATABASE_URL`: conexión PostgreSQL.
+- `JWT_SECRET`: secreto largo y aleatorio para firmar sesiones.
+- `FRONTEND_URL`: origen público exacto del frontend, sin barra final.
+- `PORT`: puerto HTTP; por defecto `5000`.
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS` y `SMTP_FROM`: cuenta que envía recuperaciones de contraseña.
+- `WEATHER_API_KEY`: opcional, para consultar el clima.
+- `ARCHIVE_DIR`: opcional, ubicación de archivos históricos.
 
----
+Frontend:
 
-## Paso 3: ¡Probar el Sistema!
+- `VITE_API_URL`: URL pública del backend terminada en `/api`, por ejemplo `https://api.ejemplo.com/api`.
 
-Abre la URL del Frontend en tu navegador web. Como ejecutaste los scripts de base de datos en el Paso 1, ya tienes cuentas creadas para probar el Control de Accesos por Roles (RBAC):
+Los archivos `.env` están ignorados por Git y deben configurarse directamente en el proveedor de hosting.
 
-* **Administrador Global:** `admin@vivero.com`
-* **Operador (Riego):** `operador@vivero.com`
-* **Técnico (Sensores):** `tecnico@vivero.com`
+## Funcionamiento inicial
 
-**Contraseña para todos:** `123456`
+1. Crea la cuenta administradora desde el inicio de sesión si la base está vacía.
+2. Crea al menos una zona.
+3. Registra cultivos y asigna usuarios cuando corresponda.
+4. Registra sensores de agua o energía en una zona.
+5. Configura umbrales y programaciones.
 
-*(Si usas la cuenta admin@vivero.com usarás la contraseña que se genera en seed.js que es `admin123`)*
-*Corrección de cuenta Administrador principal:*
-* Email: `admin@vivero.com`
-* Contraseña: `admin123`
+Los sensores activos generan lecturas simuladas cada dos minutos mientras el backend está ejecutándose. Las plantas del simulador también requieren seleccionar una zona.
 
-### Notas Adicionales
-* **Simulador IoT Automático:** El backend tiene un CronJob (`src/jobs/cron.js`) que simula automáticamente el envío de datos de sensores de agua y energía cada 2 minutos. Si configuras Umbrales en el Frontend, verás aparecer alertas de consumo crítico en tu campana de notificaciones.
-* **Mapa Sin API Key:** El mapa del simulador visual funciona con Leaflet (OpenStreetMap), por lo que no requiere registrar tarjetas de crédito ni llaves de Google Maps.
+## Comprobaciones
+
+```bash
+cd backend
+npm test
+npx prisma validate
+
+cd ../frontend
+npm run lint
+npm run build
+```
+
+## Despliegue
+
+- Ejecuta `npx prisma db push` contra la base del entorno antes de iniciar una versión cuyo esquema haya cambiado.
+- Configura `FRONTEND_URL` con el dominio real del frontend y `VITE_API_URL` con la API pública.
+- Configura una reescritura SPA en el hosting del frontend para que rutas como `/dashboard` y `/simulador` devuelvan `index.html`.
+- No ejecutes seeds en producción; la aplicación no depende de ellos.
+- No publiques `.env`, contraseñas SMTP ni `JWT_SECRET`.
+
+## Comandos
+
+Backend:
+
+- `npm start`: inicia el servidor.
+- `npm run dev`: inicia con recarga automática.
+- `npm test`: ejecuta las pruebas.
+- `npm run db:backup`: crea un respaldo manual si `pg_dump` está disponible.
+
+Frontend:
+
+- `npm run dev`: servidor de desarrollo.
+- `npm run build`: compilación de producción.
+- `npm run lint`: análisis estático.
+- `npm run preview`: vista previa de la compilación.

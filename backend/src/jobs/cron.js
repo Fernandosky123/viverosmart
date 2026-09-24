@@ -20,7 +20,7 @@ cron.schedule('*/2 * * * *', async () => {
       const quantity = Math.floor(Math.random() * 45) + 5;
       
       // Registrar consumo en base de datos
-      await prisma.consumption.create({
+      const consumption = await prisma.consumption.create({
         data: {
           resourceType: sensor.type,
           quantity: quantity,
@@ -31,16 +31,18 @@ cron.schedule('*/2 * * * *', async () => {
       });
 
       // Verificar umbrales (Motor Automático de Alertas)
-      const threshold = await prisma.threshold.findUnique({ where: { resourceType: sensor.type } });
-      if (threshold && quantity > threshold.maxLimit) {
+      const threshold = await prisma.threshold.findFirst({ where: { resourceType: sensor.type, OR: [{ sectorId: sensor.sectorId }, { sectorId: null }] }, orderBy: { sectorId: 'desc' } });
+      const level = threshold && quantity > threshold.maxLimit ? 'CRITICA' : threshold?.warningLimit && quantity > threshold.warningLimit ? 'ADVERTENCIA' : null;
+      if (level) {
         await prisma.alert.create({
           data: {
             resourceType: sensor.type,
-            level: 'CRITICA',
-            reason: `[Auto IoT] Sensor ${sensor.code} registró ${quantity}${sensor.type === 'AGUA' ? 'L' : 'kWh'}, superando el umbral de ${threshold.maxLimit}.`,
+            level,
+            reason: `[Auto IoT] Sensor ${sensor.code} registró ${quantity}${sensor.type === 'AGUA' ? 'L' : 'kWh'}, superando ${level === 'CRITICA' ? `el umbral de ${threshold.maxLimit}` : `la advertencia de ${threshold.warningLimit}`}.`,
             sectorId: sensor.sectorId
           }
         });
+        await prisma.consumptionAnomaly.create({ data: { resourceType: sensor.type, quantity, level, reason: '[Auto IoT] Consumo fuera del nivel configurado.', sectorId: sensor.sectorId, consumptionId: consumption.id } });
         console.log(`⚠️ ALERTA: Consumo crítico en Sector ${sensor.sectorId}`);
       }
     }

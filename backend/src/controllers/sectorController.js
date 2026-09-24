@@ -1,5 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const { audit } = require('../services/auditService');
 
 async function getAllSectors(req, res) {
   try {
@@ -7,6 +8,10 @@ async function getAllSectors(req, res) {
       where: { id: req.user.id },
       include: { role: true, crops: true }
     });
+
+    if (!user) {
+      return res.status(401).json({ error: 'La cuenta ya no está disponible. Inicia sesión nuevamente.' });
+    }
 
     let whereClause = {};
     if (user.role.name !== 'Administrador') {
@@ -28,6 +33,7 @@ async function createSector(req, res) {
   try {
     const { name, description } = req.body;
     const sector = await prisma.sector.create({ data: { name, description } });
+    await audit(req.user.id, 'CREATE_SECTOR', { id: sector.id, name: sector.name });
     res.json(sector);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -42,6 +48,7 @@ async function updateSector(req, res) {
       where: { id: parseInt(id) },
       data: { name, description }
     });
+    await audit(req.user.id, 'UPDATE_SECTOR', { id: sector.id });
     res.json(sector);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -52,6 +59,7 @@ async function deleteSector(req, res) {
   try {
     const { id } = req.params;
     await prisma.sector.delete({ where: { id: parseInt(id) } });
+    await audit(req.user.id, 'DELETE_SECTOR', { id: Number(id) });
     res.json({ message: 'Sector eliminado' });
   } catch (error) {
     res.status(500).json({ error: error.message });

@@ -10,6 +10,8 @@ export default function Sectores() {
   const [newSector, setNewSector] = useState({ name: '', description: '' });
   const [editingSector, setEditingSector] = useState(null);
   const navigate = useNavigate();
+  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+  const canManage = currentUser.role === 'Administrador' || (currentUser.permissions || []).includes('SECTORS_MANAGE');
 
   useEffect(() => {
     fetchSectores();
@@ -28,6 +30,7 @@ export default function Sectores() {
 
   const handleCreate = async (e) => {
     e.preventDefault();
+    if (!canManage) return;
     try {
       if (editingSector) {
         // Actualizar
@@ -74,7 +77,7 @@ export default function Sectores() {
     <div className="p-6">
       <h2 className="text-2xl font-bold text-gray-800 mb-6">Zonas y Cultivos (Gestión)</h2>
       
-      <div className={`p-6 rounded-2xl shadow-sm border mb-8 ${editingSector ? 'bg-amber-50 border-amber-200' : 'bg-white border-emerald-100'}`}>
+      {canManage ? <div className={`p-6 rounded-2xl shadow-sm border mb-8 ${editingSector ? 'bg-amber-50 border-amber-200' : 'bg-white border-emerald-100'}`}>
         <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
           {editingSector ? '✏️ Editando Sector' : '🌱 Añadir Nueva Zona'}
           {editingSector && (
@@ -96,7 +99,7 @@ export default function Sectores() {
             {editingSector ? 'Actualizar' : 'Guardar'}
           </button>
         </form>
-      </div>
+      </div> : <p className="mb-8 rounded-xl border border-stone-200 bg-stone-50 p-4 text-stone-600">Solo puedes consultar las zonas que tienes asignadas. La creación y edición están reservadas a la administración.</p>}
 
       <div className="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden">
         <table className="min-w-full divide-y divide-stone-200">
@@ -118,14 +121,14 @@ export default function Sectores() {
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-500">
                   <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-bold">{sector.sensors?.length || 0} dispositivos</span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                {canManage && <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <button onClick={() => handleEdit(sector)} className="text-amber-600 hover:text-amber-900 mr-4 transition-colors">
                     <Pencil size={18} />
                   </button>
                   <button onClick={() => handleDelete(sector.id)} className="text-red-500 hover:text-red-700 transition-colors">
                     <Trash2 size={18} />
                   </button>
-                </td>
+                </td>}
               </tr>
             ))}
             {sectores.length === 0 && (

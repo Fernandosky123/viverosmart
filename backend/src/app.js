@@ -8,17 +8,31 @@ const prisma = new PrismaClient();
 
 const plantRoutes = require('./routes/plantRoutes');
 const authRoutes = require('./routes/authRoutes');
+const authMiddleware = require('./middlewares/authMiddleware');
 
 const apiRoutes = require('./routes/apiRoutes');
 
 // Iniciar cron jobs
 require('./jobs/cron');
+require('./jobs/archive');
+const { ensurePermissions } = require('./controllers/roleController');
+ensurePermissions().catch(error => console.error('No se pudieron inicializar los permisos:', error.message));
 
 const app = express();
 
 // 2. CORS Restringido (Vulnerabilidad #2 parchada)
+const allowedOrigins = new Set([
+  process.env.FRONTEND_URL || 'http://localhost:5173',
+  // Vite puede abrir el mismo servidor de desarrollo con cualquiera de
+  // estas direcciones; ambas deben poder alcanzar la API local.
+  'http://localhost:5173',
+  'http://127.0.0.1:5173'
+]);
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173', // Cambia esto al dominio de Vercel luego
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.has(origin)) return callback(null, true);
+    return callback(new Error('Origen no permitido por CORS'));
+  },
   optionsSuccessStatus: 200
 };
 app.use(cors(corsOptions));
@@ -40,7 +54,7 @@ const authLimiter = rateLimit({
 app.use('/api/', limiter);
 app.use('/api/auth', authLimiter);
 
-app.use('/api/plantas', plantRoutes);
+app.use('/api/plantas', authMiddleware, plantRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/smart', apiRoutes);
 

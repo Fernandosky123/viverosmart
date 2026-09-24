@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from 'xlsx';
-import { Download, FileText, Table, Filter } from 'lucide-react';
+import { FileText, Table, Filter, Plus, Search } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -12,6 +12,13 @@ export default function Reportes() {
   const [consumos, setConsumos] = useState([]);
   const [sectores, setSectores] = useState([]);
   const [selectedSector, setSelectedSector] = useState('ALL');
+  const [resource, setResource] = useState('ALL');
+  const [from, setFrom] = useState('');
+  const [to, setTo] = useState('');
+  const [query, setQuery] = useState('');
+  const [sort, setSort] = useState('desc');
+  const [manualOpen, setManualOpen] = useState(false);
+  const [manual, setManual] = useState({ resourceType: 'AGUA', quantity: '', sectorId: '', timestamp: '' });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -32,9 +39,21 @@ export default function Reportes() {
     }
   };
 
-  const filteredConsumos = selectedSector === 'ALL' 
-    ? consumos 
-    : consumos.filter(c => c.sectorId === Number(selectedSector));
+  const filteredConsumos = consumos.filter(c => {
+    const date = new Date(c.timestamp);
+    const text = `${c.id} ${c.resourceType} ${c.sector?.name || ''} ${c.quantity}`.toLowerCase();
+    return (selectedSector === 'ALL' || c.sectorId === Number(selectedSector))
+      && (resource === 'ALL' || c.resourceType === resource)
+      && (!from || date >= new Date(`${from}T00:00:00`))
+      && (!to || date <= new Date(`${to}T23:59:59`))
+      && text.includes(query.toLowerCase());
+  }).sort((a, b) => sort === 'asc' ? new Date(a.timestamp) - new Date(b.timestamp) : new Date(b.timestamp) - new Date(a.timestamp));
+
+  const registerManual = async event => {
+    event.preventDefault();
+    await axios.post(`${API_URL}/smart/consumos`, { ...manual, quantity: Number(manual.quantity), sectorId: Number(manual.sectorId), isManual: true, timestamp: manual.timestamp || undefined }, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
+    setManual({ resourceType: 'AGUA', quantity: '', sectorId: '', timestamp: '' }); setManualOpen(false); fetchData();
+  };
 
   const exportPDF = () => {
     try {
@@ -117,8 +136,13 @@ export default function Reportes() {
           <button onClick={exportExcel} className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700 transition">
             <Table size={18} /> Exportar Excel
           </button>
+          <button onClick={() => setManualOpen(value => !value)} className="flex items-center gap-2 bg-emerald-800 text-white px-4 py-2 rounded shadow"><Plus size={18}/> Registro manual</button>
         </div>
       </div>
+
+      {manualOpen && <form onSubmit={registerManual} className="mb-5 p-4 border rounded-lg bg-emerald-50 grid gap-3 md:grid-cols-5"><select value={manual.resourceType} onChange={e=>setManual({...manual,resourceType:e.target.value})}><option value="AGUA">Agua</option><option value="ENERGIA">Energía</option></select><input required min="0" type="number" step="0.01" placeholder="Cantidad" value={manual.quantity} onChange={e=>setManual({...manual,quantity:e.target.value})}/><select required value={manual.sectorId} onChange={e=>setManual({...manual,sectorId:e.target.value})}><option value="">Sector</option>{sectores.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}</select><input type="datetime-local" value={manual.timestamp} onChange={e=>setManual({...manual,timestamp:e.target.value})}/><button className="bg-emerald-600 text-white rounded px-3 font-bold">Guardar lectura</button></form>}
+
+      <div className="mb-4 grid grid-cols-1 md:grid-cols-5 gap-3"><label className="flex items-center gap-2 border rounded px-3"><Search size={16}/><input className="w-full" placeholder="Buscar" value={query} onChange={e=>setQuery(e.target.value)}/></label><select value={resource} onChange={e=>setResource(e.target.value)}><option value="ALL">Todos los recursos</option><option value="AGUA">Agua</option><option value="ENERGIA">Energía</option></select><input type="date" aria-label="Desde" value={from} onChange={e=>setFrom(e.target.value)}/><input type="date" aria-label="Hasta" value={to} onChange={e=>setTo(e.target.value)}/><select value={sort} onChange={e=>setSort(e.target.value)}><option value="desc">Más reciente primero</option><option value="asc">Más antiguo primero</option></select></div>
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">

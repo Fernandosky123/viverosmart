@@ -1,0 +1,15 @@
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+import { Plus, Trash2, Pencil } from 'lucide-react';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const headers = () => ({ Authorization: `Bearer ${localStorage.getItem('token')}` });
+const empty = { name:'', species:'', sectorId:'', stage:'Semilla', growthPercent:0 };
+export default function Cultivos() {
+  const [crops,setCrops]=useState([]),[sectors,setSectors]=useState([]),[form,setForm]=useState(empty),[editing,setEditing]=useState(null);
+  const load=async()=>{const [c,s]=await Promise.all([axios.get(`${API_URL}/smart/cultivos`,{headers:headers()}),axios.get(`${API_URL}/smart/sectores`,{headers:headers()})]);setCrops(c.data);setSectors(s.data);};
+  useEffect(()=>{load().catch(()=>{});},[]);
+  const save=async e=>{e.preventDefault();const body={...form,sectorId:Number(form.sectorId),growthPercent:Number(form.growthPercent)};if(editing)await axios.put(`${API_URL}/smart/cultivos/${editing}`,body,{headers:headers()});else await axios.post(`${API_URL}/smart/cultivos`,body,{headers:headers()});setEditing(null);setForm(empty);load();};
+  const edit=c=>{setEditing(c.id);setForm({name:c.name,species:c.species||'',sectorId:String(c.sectorId),stage:c.stage,growthPercent:c.growthPercent});};
+  const remove=async id=>{if(window.confirm('¿Eliminar cultivo?')){await axios.delete(`${API_URL}/smart/cultivos/${id}`,{headers:headers()});load();}};
+  return <div className="p-6"><h2 className="text-2xl font-black mb-2">Gestión de cultivos</h2><p className="mb-5 text-gray-500">Registra, actualiza y asigna cultivos a un sector.</p><form onSubmit={save} className="grid md:grid-cols-6 gap-3 bg-white border rounded-xl p-5 mb-6"><input required placeholder="Nombre" value={form.name} onChange={e=>setForm({...form,name:e.target.value})}/><input placeholder="Especie" value={form.species} onChange={e=>setForm({...form,species:e.target.value})}/><select required value={form.sectorId} onChange={e=>setForm({...form,sectorId:e.target.value})}><option value="">Sector</option>{sectors.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}</select><select value={form.stage} onChange={e=>setForm({...form,stage:e.target.value})}>{['Semilla','Brote','Crecimiento','Floración','Cosecha'].map(x=><option key={x}>{x}</option>)}</select><input min="0" max="100" type="number" value={form.growthPercent} onChange={e=>setForm({...form,growthPercent:e.target.value})}/><button className="button button-dark"><Plus size={17}/>{editing?'Actualizar':'Agregar'}</button></form><div className="bg-white border rounded-xl overflow-hidden"><table className="min-w-full"><thead><tr><th>Nombre</th><th>Especie</th><th>Sector</th><th>Etapa</th><th>Progreso</th><th/></tr></thead><tbody>{crops.map(c=><tr key={c.id}><td>{c.name}</td><td>{c.species||'-'}</td><td>{c.sector?.name}</td><td>{c.stage}</td><td>{c.growthPercent}%</td><td><button onClick={()=>edit(c)} className="mr-3" aria-label="Editar cultivo"><Pencil size={17}/></button><button onClick={()=>remove(c.id)} aria-label="Eliminar cultivo"><Trash2 size={17}/></button></td></tr>)}</tbody></table></div></div>;
+}

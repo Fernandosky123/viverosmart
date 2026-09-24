@@ -1,50 +1,70 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
+import { icon } from 'leaflet';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerIconRetina from 'leaflet/dist/images/marker-icon-2x.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
 
-// Arreglar el icono por defecto de Leaflet en React
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+const locationIcon = icon({
+  iconUrl: markerIcon,
+  iconRetinaUrl: markerIconRetina,
+  shadowUrl: markerShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
 });
 
-function LocationMarker({ position, setPosition, onLocationChange }) {
+function LocationMarker({ lat, lng, onLocationChange, disabled }) {
   const map = useMapEvents({
-    click(e) {
-      setPosition(e.latlng);
-      if(onLocationChange) onLocationChange(e.latlng.lat, e.latlng.lng);
+    click(event) {
+      if (!disabled) onLocationChange?.(event.latlng.lat, event.latlng.lng);
     },
   });
 
   useEffect(() => {
-    // Forzar actualización del tamaño del mapa al cargar por si está en gris
-    setTimeout(() => { map.invalidateSize(); }, 500);
+    // Sigue la ubicación confirmada por el padre; un guardado fallido no mueve el pin.
+    map.setView([lat, lng], map.getZoom(), { animate: false });
+  }, [map, lat, lng]);
+
+  useEffect(() => {
+    const container = map.getContainer();
+    const observer = new ResizeObserver(() => map.invalidateSize());
+    observer.observe(container);
+    return () => observer.disconnect();
   }, [map]);
 
-  return position === null ? null : (
-    <Marker position={position}>
-      <Popup>Ubicación del Vivero</Popup>
+  return (
+    <Marker position={[lat, lng]} icon={locationIcon}>
+      <Popup>Ubicación del invernadero</Popup>
     </Marker>
   );
 }
 
-export default function MapaPin({ onLocationChange, currentLat, currentLng }) {
-  const isValidLocation = currentLat && currentLng && currentLat !== 0;
-  const initialCenter = isValidLocation ? { lat: currentLat, lng: currentLng } : { lat: -17.783, lng: -63.182 };
-  const [position, setPosition] = useState(initialCenter);
+export default function MapaPin({ onLocationChange, currentLat, currentLng, disabled = false }) {
+  const [tileError, setTileError] = useState(false);
+  const validLocation = Number.isFinite(currentLat) && Number.isFinite(currentLng)
+    && Math.abs(currentLat) <= 90 && Math.abs(currentLng) <= 180;
+  const lat = validLocation ? currentLat : -17.783;
+  const lng = validLocation ? currentLng : -63.182;
 
   return (
-    <div className="rounded-xl overflow-hidden border-4 border-emerald-700/30 shadow-inner cursor-crosshair" style={{ height: '300px', width: '100%', position: 'relative', zIndex: 0 }}>
-      <MapContainer center={initialCenter} zoom={13} scrollWheelZoom={false} style={{ height: '100%', width: '100%' }}>
+    <div className="location-map" aria-label="Mapa de ubicación del invernadero" aria-busy={disabled}>
+      <MapContainer
+        center={[lat, lng]}
+        zoom={13}
+        scrollWheelZoom={false}
+        style={{ height: '100%', width: '100%', cursor: disabled ? 'default' : 'crosshair' }}
+      >
         <TileLayer
-          attribution='Tiles &copy; Esri'
+          attribution="Tiles &copy; Esri"
           url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+          eventHandlers={{ tileerror: () => setTileError(true), tileload: () => setTileError(false) }}
         />
-        <LocationMarker position={position} setPosition={setPosition} onLocationChange={onLocationChange} />
+        <LocationMarker lat={lat} lng={lng} onLocationChange={onLocationChange} disabled={disabled} />
       </MapContainer>
+      {tileError && <p className="map-tile-error" role="status">No se pudo cargar el fondo del mapa. Comprueba tu conexión a internet.</p>}
     </div>
   );
 }

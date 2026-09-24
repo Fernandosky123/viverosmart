@@ -15,7 +15,9 @@ function authMiddleware(req, res, next) {
     req.user = verified;
     next();
   } catch (error) {
-    res.status(400).json({ error: 'Token no válido.' });
+    // Un token vencido o malformado es un problema de autenticación, no de
+    // formato de la petición. El frontend usa 401 para limpiar la sesión.
+    res.status(401).json({ error: 'Token no válido.' });
   }
 }
 

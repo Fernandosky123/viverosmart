@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Settings, Users, Shield, Plus } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Settings, Shield, Plus, Pencil, Trash2 } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -10,7 +9,7 @@ export default function Usuarios() {
   const [roles, setRoles] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [newUser, setNewUser] = useState({ name: '', email: '', password: '', roleId: '' });
-  const navigate = useNavigate();
+  const [editingUser, setEditingUser] = useState(null);
 
   const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
   const isAdmin = currentUser.role === 'Administrador';
@@ -26,18 +25,23 @@ export default function Usuarios() {
   const handleCreate = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`${API_URL}/smart/usuarios`, newUser, {
+      if (editingUser) await axios.put(`${API_URL}/smart/usuarios/${editingUser.id}`, newUser, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      }); else await axios.post(`${API_URL}/smart/usuarios`, newUser, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       setShowForm(false);
+      setEditingUser(null);
       setNewUser({ name: '', email: '', password: '', roleId: '' });
       // Refrescar
       const res = await axios.get(`${API_URL}/smart/usuarios`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }});
       setUsuarios(res.data);
-    } catch (error) {
+    } catch {
       alert('Error creando usuario');
     }
   };
+  const edit = user => { setEditingUser(user); setNewUser({ name:user.name, email:user.email, password:'', roleId:String(user.roleId) }); setShowForm(true); };
+  const remove = async id => { if (!window.confirm('¿Eliminar este usuario?')) return; await axios.delete(`${API_URL}/smart/usuarios/${id}`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }); const res = await axios.get(`${API_URL}/smart/usuarios`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }); setUsuarios(res.data); };
 
   if (!isAdmin) {
     return (
@@ -78,7 +82,7 @@ export default function Usuarios() {
           </div>
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-1">Contraseña</label>
-            <input required type="password" value={newUser.password} onChange={e=>setNewUser({...newUser, password: e.target.value})} className="w-full border rounded-lg px-3 py-2" />
+            <input required={!editingUser} type="password" value={newUser.password} onChange={e=>setNewUser({...newUser, password: e.target.value})} className="w-full border rounded-lg px-3 py-2" />
           </div>
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-1">Cargo / Rol</label>
@@ -101,6 +105,7 @@ export default function Usuarios() {
               <th className="px-6 py-4 text-left text-xs font-black text-stone-500 uppercase">Email</th>
               <th className="px-6 py-4 text-left text-xs font-black text-stone-500 uppercase">Rol / Cargo</th>
               <th className="px-6 py-4 text-left text-xs font-black text-stone-500 uppercase">Estado</th>
+              <th className="px-6 py-4 text-right text-xs font-black text-stone-500 uppercase">Acciones</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-stone-100">
@@ -118,6 +123,7 @@ export default function Usuarios() {
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap"><span className="text-emerald-500 font-bold">Activo</span></td>
+                <td className="px-6 py-4 text-right"><button onClick={()=>edit(user)} className="mr-3 text-amber-600" aria-label="Editar usuario"><Pencil size={17}/></button><button onClick={()=>remove(user.id)} className="text-red-600" aria-label="Eliminar usuario"><Trash2 size={17}/></button></td>
               </tr>
             ))}
           </tbody>

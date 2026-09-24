@@ -12,6 +12,45 @@ function getSoilStateFromMoisture(moisture) {
   return 'mojado';
 }
 
+// Enumerar las plantas existentes; sus IDs no necesariamente empiezan en 1.
+router.get('/', async (req, res) => {
+  try {
+    const currentUser = await prisma.user.findUnique({ where: { id: req.user.id }, include: { role: true } });
+    if (!currentUser) return res.status(401).json({ error: 'La cuenta ya no está disponible.' });
+    const plants = await prisma.plant.findMany({
+      where: currentUser.role.name === 'Administrador' ? { sectorId: { not: null } } : { userId: currentUser.id, sectorId: { not: null } },
+      select: { id: true, name: true, species: true, lat: true, lng: true, sectorId: true, sector: { select: { id: true, name: true } } },
+      orderBy: { id: 'asc' }
+    });
+    res.json(plants);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.param('id', (req, res, next, id) => {
+  if (!/^\d+$/.test(id) || !Number.isSafeInteger(Number(id)) || Number(id) < 1) {
+    return res.status(400).json({ error: 'El identificador de la planta no es válido.' });
+  }
+  next();
+});
+
+// Verifica propiedad antes de cualquier operación sobre una planta concreta.
+router.use('/:id', async (req, res, next) => {
+  try {
+    const [plant, currentUser] = await Promise.all([
+      prisma.plant.findUnique({ where: { id: Number(req.params.id) } }),
+      prisma.user.findUnique({ where: { id: req.user.id }, include: { role: true } })
+    ]);
+    if (!currentUser) return res.status(401).json({ error: 'La cuenta ya no está disponible.' });
+    if (!plant || plant.sectorId == null) return res.status(404).json({ error: 'Planta no encontrada.' });
+    if (currentUser.role.name !== 'Administrador' && plant.userId !== currentUser.id) return res.status(403).json({ error: 'No tienes acceso a esta planta.' });
+    next();
+  } catch (error) {
+    res.status(500).json({ error: 'No se pudo validar el acceso a la planta.' });
+  }
+});
+
 // GET /api/plantas/:id — obtener estado actual de una planta
 router.get('/:id', async (req, res) => {
   try {
@@ -197,13 +236,33 @@ router.post('/:id/simular-humedad', async (req, res) => {
 // ENDPOINT EXTRA: Crear una planta
 router.post('/', async (req, res) => {
   try {
-    const { name, species, lat, lng } = req.body;
+    const { name, species, lat, lng, sectorId } = req.body;
+    const selectedSectorId = Number(sectorId);
+    if (!Number.isInteger(selectedSectorId)) return res.status(400).json({ error: 'Debes seleccionar una zona para la planta.' });
+    const sector = await prisma.sector.findUnique({ where: { id: selectedSectorId } });
+    if (!sector) return res.status(400).json({ error: 'La zona seleccionada no existe.' });
+    if (typeof name !== 'string' || !name.trim() ||
+        typeof species !== 'string' || !species.trim() ||
+        !Number.isFinite(lat) || lat < -90 || lat > 90 ||
+        !Number.isFinite(lng) || lng < -180 || lng > 180) {
+      return res.status(400).json({ error: 'Indica un nombre, una especie y coordenadas válidas.' });
+    }
     const plant = await prisma.plant.create({
-      data: { name, species, lat, lng }
+      data: { name: name.trim(), species: species.trim(), lat, lng, sectorId: selectedSectorId, userId: req.user.id }
     });
     res.json(plant);
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+// Eliminar una planta del simulador y sus estados asociados.
+router.delete('/:id', async (req, res) => {
+  try {
+    await prisma.plant.delete({ where: { id: Number(req.params.id) } });
+    res.status(204).end();
+  } catch (error) {
+    res.status(404).json({ error: 'Planta no encontrada.' });
   }
 });
 
