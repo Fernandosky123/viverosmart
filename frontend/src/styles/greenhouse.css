@@ -1,0 +1,337 @@
+@import url("https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css");
+
+:root {
+  --vs-forest-950: #082b1d;
+  --vs-forest-900: #0b3b27;
+  --vs-forest-800: #115c3b;
+  --vs-forest-700: #16734a;
+  --vs-forest-600: #198754;
+  --vs-forest-500: #27a463;
+  --vs-leaf-400: #63c174;
+  --vs-leaf-100: #eaf7ee;
+  --vs-mint-50: #f5fbf7;
+  --vs-surface: #ffffff;
+  --vs-border: #dcebe1;
+  --vs-text: #173226;
+  --vs-muted: #70857a;
+  --vs-danger: #b54a4a;
+  --vs-warning: #a97818;
+  --vs-shadow: 0 14px 38px rgba(13, 64, 40, .07);
+}
+
+html, body, #root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--vs-mint-50);
+  color: var(--vs-text);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+button, input, select, textarea {
+  font: inherit;
+}
+
+button {
+  transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease, border-color .18s ease, color .18s ease;
+}
+
+[data-dashboard-path] {
+  min-height: calc(100vh - 80px);
+  background:
+    radial-gradient(circle at 92% 0%, rgba(99,193,116,.08), transparent 24rem),
+    linear-gradient(180deg, #f8fcf9 0%, #f2f7f4 100%);
+}
+
+[data-dashboard-path] > div:not(.dashboard-page) {
+  padding: 2rem !important;
+}
+
+[data-dashboard-path] h2 {
+  color: var(--vs-forest-950);
+  letter-spacing: -.025em;
+}
+
+[data-dashboard-path] > div > p:first-of-type {
+  color: var(--vs-muted);
+}
+
+[data-dashboard-path] .bg-white {
+  background: rgba(255,255,255,.96) !important;
+  border-color: var(--vs-border) !important;
+  box-shadow: var(--vs-shadow);
+}
+
+[data-dashboard-path] .rounded-xl,
+[data-dashboard-path] .rounded-2xl {
+  border-radius: 18px !important;
+}
+
+[data-dashboard-path] input:not([type="checkbox"]),
+[data-dashboard-path] select,
+[data-dashboard-path] textarea {
+  min-height: 44px;
+  border: 1px solid #d5e5da !important;
+  border-radius: 12px !important;
+  background: #fff !important;
+  color: var(--vs-text);
+  padding: .68rem .85rem;
+  outline: none;
+  box-shadow: inset 0 1px 1px rgba(9,56,34,.025);
+}
+
+[data-dashboard-path] input:not([type="checkbox"]):focus,
+[data-dashboard-path] select:focus,
+[data-dashboard-path] textarea:focus {
+  border-color: var(--vs-forest-500) !important;
+  box-shadow: 0 0 0 .22rem rgba(25,135,84,.11) !important;
+}
+
+[data-dashboard-path] table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+[data-dashboard-path] thead th {
+  background: #f4faf6;
+  color: #557166;
+  border-bottom: 1px solid var(--vs-border);
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: .95rem 1.1rem;
+  white-space: nowrap;
+}
+
+[data-dashboard-path] tbody td {
+  padding: .95rem 1.1rem;
+  border-bottom: 1px solid #edf3ef;
+  color: #334d40;
+  font-size: .9rem;
+  vertical-align: middle;
+}
+
+[data-dashboard-path] tbody tr {
+  transition: background-color .16s ease;
+}
+
+[data-dashboard-path] tbody tr:hover {
+  background: #f7fbf8;
+}
+
+[data-dashboard-path] tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+[data-dashboard-path] .button,
+[data-dashboard-path] button[class*="bg-emerald-"],
+[data-dashboard-path] button[class*="button-dark"] {
+  border: 0;
+  border-radius: 12px;
+  font-weight: 750;
+}
+
+[data-dashboard-path] .button-dark {
+  background: linear-gradient(135deg, var(--vs-forest-700), var(--vs-forest-900)) !important;
+  color: #fff !important;
+  box-shadow: 0 8px 18px rgba(17,92,59,.18);
+}
+
+[data-dashboard-path] .button-dark:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 11px 24px rgba(17,92,59,.24);
+}
+
+[data-dashboard-path] .button-soft {
+  background: var(--vs-leaf-100) !important;
+  color: var(--vs-forest-800) !important;
+  border: 1px solid #cde8d5 !important;
+}
+
+[data-dashboard-path] .button-soft:hover {
+  background: #dff2e5 !important;
+}
+
+[data-dashboard-path] .metric-water,
+[data-dashboard-path] .metric-energy,
+[data-dashboard-path] .metric-alerts {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(145deg, #ffffff, #f2faf5) !important;
+  border: 1px solid var(--vs-border) !important;
+  box-shadow: var(--vs-shadow);
+}
+
+[data-dashboard-path] .metric-water::after,
+[data-dashboard-path] .metric-energy::after,
+[data-dashboard-path] .metric-alerts::after {
+  content: "";
+  position: absolute;
+  width: 110px;
+  height: 110px;
+  right: -35px;
+  top: -45px;
+  border-radius: 50%;
+  background: rgba(39,164,99,.08);
+}
+
+[data-dashboard-path] .metric-water > div:last-child,
+[data-dashboard-path] .metric-energy > div:last-child,
+[data-dashboard-path] .metric-alerts > div:last-child {
+  background: var(--vs-forest-700) !important;
+  position: relative;
+  z-index: 1;
+}
+
+[data-dashboard-path] .metric-water p,
+[data-dashboard-path] .metric-energy p,
+[data-dashboard-path] .metric-alerts p {
+  color: var(--vs-forest-700) !important;
+}
+
+[data-dashboard-path] .metric-water h2,
+[data-dashboard-path] .metric-energy h2,
+[data-dashboard-path] .metric-alerts h2 {
+  color: var(--vs-forest-950) !important;
+}
+
+[data-dashboard-path] .feedback {
+  border-radius: 12px;
+  padding: .85rem 1rem;
+  border: 1px solid #cde8d5;
+  background: #f0faf3;
+  color: var(--vs-forest-800);
+}
+
+[data-dashboard-path] .feedback.error {
+  border-color: #f0caca;
+  background: #fff5f5;
+  color: var(--vs-danger);
+}
+
+[data-dashboard-path] .status-dot {
+  box-shadow: 0 0 0 4px rgba(39,164,99,.10);
+}
+
+.dashboard-page {
+  padding-top: 2rem !important;
+}
+
+.dashboard-page > div:first-child {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--vs-border) !important;
+  box-shadow: var(--vs-shadow);
+}
+
+.dashboard-page > div:first-child::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 5px;
+  background: linear-gradient(180deg, var(--vs-leaf-400), var(--vs-forest-800));
+}
+
+.dashboard-page > div:first-child h2 {
+  color: var(--vs-forest-950) !important;
+}
+
+.dashboard-page button {
+  border-radius: 12px;
+}
+
+.dashboard-page .bg-emerald-600 {
+  background: linear-gradient(135deg, var(--vs-forest-700), var(--vs-forest-900)) !important;
+}
+
+.dashboard-page .bg-emerald-600:hover {
+  background: linear-gradient(135deg, var(--vs-forest-600), var(--vs-forest-800)) !important;
+}
+
+.location-map {
+  min-height: 320px;
+  overflow: hidden;
+  border: 1px solid var(--vs-border);
+  border-radius: 18px;
+  box-shadow: var(--vs-shadow);
+}
+
+.account-popover,
+.workspace-popover {
+  backdrop-filter: blur(14px);
+}
+
+.plant-illustration {
+  filter: drop-shadow(0 12px 12px rgba(16,67,40,.10));
+}
+
+@media (max-width: 767.98px) {
+  [data-dashboard-path] > div:not(.dashboard-page) {
+    padding: 1rem !important;
+  }
+
+  .dashboard-page {
+    padding: 1rem !important;
+  }
+
+  [data-dashboard-path] table {
+    min-width: 680px;
+  }
+
+  [data-dashboard-path] .overflow-hidden {
+    overflow-x: auto !important;
+  }
+}
+
+/* Shell premium: navegación y barra superior */
+.vivero-shell > aside {
+  background: linear-gradient(180deg, #092e20 0%, #0b3a28 55%, #082b1d 100%) !important;
+  border-right: 1px solid rgba(154, 219, 172, .12);
+}
+
+.vivero-shell > aside .bg-emerald-500 {
+  background: linear-gradient(135deg, #39b96d, #17834d) !important;
+}
+
+.vivero-shell > aside nav button {
+  min-height: 43px;
+}
+
+.vivero-shell > aside nav button:hover {
+  transform: translateX(2px);
+}
+
+.vivero-shell > aside nav button.bg-emerald-500 {
+  background: linear-gradient(135deg, #28a961, #147943) !important;
+  box-shadow: 0 9px 22px rgba(24, 145, 81, .28) !important;
+}
+
+.vivero-shell > aside .workspace-label {
+  backdrop-filter: blur(10px);
+}
+
+.vivero-shell > .min-w-0 > header {
+  background: rgba(255,255,255,.90) !important;
+  border-bottom-color: #dcebe1 !important;
+  backdrop-filter: blur(16px);
+}
+
+.vivero-shell > .min-w-0 > header button:hover {
+  box-shadow: 0 6px 18px rgba(13,64,40,.09);
+}
+
+.vivero-shell .topbar-avatar {
+  background: linear-gradient(135deg, #2eaa65, #0d7041) !important;
+  border-color: #0d7041 !important;
+}
+
+@media (max-width: 767.98px) {
+  .vivero-shell > aside {
+    width: min(86vw, 330px) !important;
+  }
+}

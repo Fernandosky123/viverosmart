@@ -1,4 +1,5 @@
-﻿import { useState, useEffect } from 'react';
+import '../styles/premium.css';
+import { useState, useEffect } from 'react';
 import { Navigate, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { LayoutDashboard, Leaf, FileSpreadsheet, LogOut, Settings, Bell, TreePine, Sprout, CalendarClock, Radio, Activity, ShieldCheck, UserRound, Menu, X, ChevronDown, ArrowUpRight } from 'lucide-react';
@@ -121,12 +122,12 @@ export default function SmartApp() {
   if (!localStorage.getItem('token')) return <Navigate to="/" replace />;
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#f4f7f6] font-sans selection:bg-emerald-200">
+    <div className="premium-shell flex h-screen overflow-hidden bg-[#f4f7f6] font-sans selection:bg-emerald-200">
 
       {mobileOpen && <button aria-label="Cerrar navegación" className="fixed inset-0 z-30 bg-black/45 md:hidden" onClick={() => setMobileOpen(false)} />}
 
       {/* Sidebar - Theme Vivero */}
-      <aside className={`fixed inset-y-0 left-0 z-40 w-72 shrink-0 bg-[#1a2f26] text-emerald-50 flex flex-col shadow-2xl transition-transform md:static md:translate-x-0 ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <aside className={`premium-sidebar fixed inset-y-0 left-0 z-40 w-72 shrink-0 bg-[#1a2f26] text-emerald-50 flex flex-col shadow-2xl transition-transform md:static md:translate-x-0 ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="px-6 py-5 flex items-center gap-3 bg-black/10">
           <div className="bg-emerald-500 p-2 rounded-xl shadow-lg shadow-emerald-900/50">
             <TreePine className="text-white" size={28} />
@@ -193,7 +194,7 @@ export default function SmartApp() {
       {/* Main Content Area */}
       <div className="min-w-0 flex-1 overflow-auto flex flex-col relative">
         {/* Top Navbar */}
-        <header className="h-20 bg-white border-b border-stone-200 flex items-center justify-between px-4 md:px-8 sticky top-0 z-20 shadow-sm">
+        <header className="premium-topbar h-20 bg-white border-b border-stone-200 flex items-center justify-between px-4 md:px-8 sticky top-0 z-20 shadow-sm">
           <button className="grid h-10 w-10 place-items-center rounded-full border border-stone-200 text-stone-600 md:hidden" onClick={() => setMobileOpen(true)} aria-label="Abrir navegación"><Menu size={20}/></button>
           <div className="ml-auto flex items-center gap-4 relative">
             <button onClick={() => setShowNotifications(!showNotifications)} className="relative w-10 h-10 bg-white border border-stone-200 rounded-full flex items-center justify-center text-stone-500 hover:text-emerald-600 hover:border-emerald-300 transition-colors shadow-sm">
@@ -225,7 +226,7 @@ export default function SmartApp() {
           </div>
         </header>
 
-        <div className="flex-1 pb-12">
+        <div className="premium-content flex-1 pb-12">
           <div data-dashboard-path={normalizedPath}>{currentPage}</div>
         </div>
       </div>

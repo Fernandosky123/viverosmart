@@ -1,3 +1,4 @@
+import '../styles/premium.css';
 import { useEffect, useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -51,7 +52,7 @@ export default function Login() {
     }
   }
 
-  return <main className="min-h-screen grid lg:grid-cols-[1.1fr_.9fr] bg-stone-50">
+  return <main className="premium-login min-h-screen grid lg:grid-cols-[1.1fr_.9fr] bg-stone-50">
     <section className="hidden lg:flex relative overflow-hidden bg-emerald-950 text-white p-14 flex-col justify-between">
       <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_25%_25%,#34d399_0,transparent_35%),radial-gradient(circle_at_80%_75%,#84cc16_0,transparent_30%)]" />
       <div className="relative flex items-center gap-3 text-2xl font-black"><span className="grid place-items-center size-11 rounded-2xl bg-emerald-400 text-emerald-950"><Leaf /></span>ViveroSmart</div>
@@ -59,8 +60,8 @@ export default function Login() {
       <div className="relative flex items-center gap-3 text-sm text-emerald-100/70"><Sprout size={19}/> Naturaleza y tecnología trabajando juntas.</div>
     </section>
 
-    <section className="flex items-center justify-center px-6 py-12">
-      <div className="w-full max-w-md">
+    <section className="login-panel flex items-center justify-center px-6 py-12">
+      <div className="login-card w-full max-w-md">
         <div className="lg:hidden flex items-center gap-2 mb-10 text-xl font-black text-emerald-950"><Leaf/> ViveroSmart</div>
         <span className="text-xs font-black tracking-[.2em] text-emerald-600">{needsSetup ? 'CONFIGURACIÓN INICIAL' : 'ACCESO AL VIVERO'}</span>
         <h2 className="mt-3 text-4xl font-black text-stone-900">{needsSetup ? 'Crea la cuenta administradora' : 'Bienvenido de nuevo'}</h2>
