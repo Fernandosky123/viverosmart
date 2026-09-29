@@ -1,12 +1,26 @@
 services:
+
+  postgres:
+    image: postgres:16
+    container_name: viverosmart-postgres
+    environment:
+      POSTGRES_USER: viverosmart
+      POSTGRES_PASSWORD: viverosmart
+      POSTGRES_DB: viverosmart
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
   api:
     build: ./backend
     env_file:
-      - ./backend/.env
       - ./.env.docker
     environment:
-      FRONTEND_URL: http://localhost:8080
       PORT: 5000
+      FRONTEND_URL: http://localhost:8080
+    depends_on:
+      - postgres
     ports:
       - "5000:5000"
 
@@ -17,3 +31,8 @@ services:
         VITE_API_URL: http://localhost:5000/api
     ports:
       - "8080:80"
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:
